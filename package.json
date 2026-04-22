@@ -1,0 +1,26 @@
+{
+  "name": "ishop_project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "frontend": "cd frontend && npm run dev",
+    "backend": "cd backend && node --watch index.js",
+    "start": "concurrently \"npm run frontend\" \"npm run backend\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VikashAlex/ishop-full-stack.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VikashAlex/ishop-full-stack/issues"
+  },
+  "homepage": "https://github.com/VikashAlex/ishop-full-stack#readme",
+  "dependencies": {
+    "concurrently": "^9.2.0"
+  }
+}

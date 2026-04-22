@@ -1,0 +1,22 @@
+# Force correct language detection for MERN stack project
+
+# Backend (Node.js + Express)
+*.js linguist-language=JavaScript
+
+# React Frontend
+*.jsx linguist-language=JavaScript
+
+# Styles
+*.css linguist-language=CSS
+*.scss linguist-language=CSS
+
+# HTML Files
+*.html linguist-language=HTML
+
+# JSON / Config files
+*.json linguist-language=JSON
+
+# Ignore build / dist files from language stats
+build/* linguist-vendored
+dist/* linguist-vendored
+node_modules/* linguist-vendored

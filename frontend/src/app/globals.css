@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@import "swiper/css";
+@import "swiper/css/navigation";
+@import "swiper/css/pagination";
+
+html,body{
+    background-color: #E2E4EB;
+}
