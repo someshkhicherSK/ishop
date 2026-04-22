@@ -11,15 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/VikashAlex/ishop-full-stack.git"
+    "url": "git+https://github.com/someshkhicherSK/ishop-full-stack.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/VikashAlex/ishop-full-stack/issues"
+    "url": "https://github.com/someshkhicherSK/ishop/issues"
   },
-  "homepage": "https://github.com/VikashAlex/ishop-full-stack#readme",
+  "homepage": "https://github.com/someshkhicherSK/ishop#readme",
   "dependencies": {
     "concurrently": "^9.2.0"
   }
