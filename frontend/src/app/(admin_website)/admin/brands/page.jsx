@@ -239,6 +239,7 @@
 
 //   );
 // }
+import React, { useEffect } from "react";
  useEffect(() => {
   getBrands().then(res => console.log(res));
 }, []);
