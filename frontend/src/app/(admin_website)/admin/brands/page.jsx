@@ -239,6 +239,9 @@
 
 //   );
 // }
+"use client";
+
+import { useEffect } from "react";
  useEffect(() => {
   getBrands().then(res => console.log(res));
 }, []);
