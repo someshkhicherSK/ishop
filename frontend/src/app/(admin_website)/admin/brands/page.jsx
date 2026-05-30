@@ -239,6 +239,6 @@ export default function BrandsPage() {
 
   );
 }
- useEffect(() => {
-  getBrands().then(res => console.log(res));
-}, []);
+//  useEffect(() => {
+//   getBrands().then(res => console.log(res));
+// }, []);
