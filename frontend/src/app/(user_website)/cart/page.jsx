@@ -1,6 +1,6 @@
 
-import { getProduct } from '../../../../library/api_calls'
-import CartItems from '../components/CartItems'
+import { getProduct } from '../../../../library/api_calls';
+import CartItems from '../components/CartItems';
 
 async function page() {
     const product = await getProduct();
