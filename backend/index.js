@@ -131,18 +131,33 @@ mongoose.set("strictQuery", true);
 server.use(express.json());
 
 // NEXT-STEP: Updated CORS with your new Vercel URL
+// server.use(
+//   cors({
+//     origin: [
+//       "http://localhost:3000", // Local development ke liye
+//       "https://ishop-7f56hpnos-someshkhichersks-projects.vercel.app" // Aapka naya Vercel URL
+//     ],
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"]
+//   })
+// );
+// PERMANENT SOLUTION: Yeh har naye Vercel URL ko automatic accept kar lega
 server.use(
   cors({
-    origin: [
-      "http://localhost:3000", // Local development ke liye
-      "https://ishop-7f56hpnos-someshkhichersks-projects.vercel.app" // Aapka naya Vercel URL
-    ],
+    origin: (origin, callback) => {
+      // Agar request localhost se hai ya vercel.app se hai, toh allow kar do
+      if (!origin || origin.startsWith("http://localhost") || origin.endsWith("vercel.app")) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
-
 server.use(cookieParser());
 
 server.use("/category", categoryRoutes);
