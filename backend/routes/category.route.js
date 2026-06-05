@@ -1,10 +1,30 @@
-const router=require("express").Router();
-const fileUpload=require("express-fileupload");
-const ctrl=require("../controllers/category.controller");
+// const router=require("express").Router();
+// const fileUpload=require("express-fileupload");
+// const ctrl=require("../controllers/category.controller");
 
-router.get("/get",ctrl.getCategory);
-router.post("/create",fileUpload(),ctrl.createCategory);
-router.patch("/status/:id",ctrl.status);
-router.delete("/delete/:id",ctrl.deleteCategory);
+// router.get("/get",ctrl.getCategory);
+// router.post("/create",fileUpload(),ctrl.createCategory);
+// router.patch("/status/:id",ctrl.status);
+// router.delete("/delete/:id",ctrl.deleteCategory);
 
-module.exports=router;
+// module.exports=router;
+
+
+
+
+const router = require("express").Router();
+const fileUpload = require("express-fileupload");
+const ctrl = require("../controllers/category.controller");
+
+router.get("/get", ctrl.getCategory);
+router.get("/get/:id", ctrl.getSingleCategory);
+
+router.post("/create", fileUpload(), ctrl.createCategory);
+
+router.put("/update/:id", fileUpload(), ctrl.updateCategory);
+
+router.patch("/status/:id", ctrl.status);
+
+router.delete("/delete/:id", ctrl.deleteCategory);
+
+module.exports = router;
