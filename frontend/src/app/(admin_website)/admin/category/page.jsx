@@ -209,11 +209,11 @@ export default function CategoryPage() {
                     </td>
 
                     <td className="p-4">
-                      <img
-                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/categoryImg/${cat.image}`}
-                        alt={cat.name}
-                        className="w-16 h-16 rounded-xl object-cover border shadow-sm"
-                      />
+                     <img
+  src={cat.image}
+  alt={cat.name}
+  className="w-16 h-16 rounded-xl object-cover border shadow-sm"
+/>
                     </td>
 
                     <td className="p-4 font-medium text-slate-800">
