@@ -1,6 +1,7 @@
 import { Axiosinstance } from "@/app/utils/helper";
 
 const API_TIMEOUT = 30000;
+const SINGLE_PRODUCT_TIMEOUT = 60000;
 
 export const getCategory = async (id = null) => {
   try {
@@ -32,11 +33,23 @@ export const getProduct = async (
     if (min) query.append("min", min);
     if (max) query.append("max", max);
 
-    const res = await Axiosinstance.get(`${API}?${query}`, {
-      timeout: API_TIMEOUT,
-    });
-    return res.data.getProduct || [];
+    const timeout = id ? SINGLE_PRODUCT_TIMEOUT : API_TIMEOUT;
+    const res = await Axiosinstance.get(`${API}?${query}`, { timeout });
+    const data = res.data.getProduct;
+    if (id) return data || null;
+    return Array.isArray(data) ? data : [];
   } catch (e) {
+    if (id) {
+      try {
+        const res = await Axiosinstance.get(`product/get/${id}`, {
+          timeout: SINGLE_PRODUCT_TIMEOUT,
+        });
+        return res.data.getProduct || null;
+      } catch (retryError) {
+        console.log("PRODUCT ERROR:", retryError.message);
+        return null;
+      }
+    }
     console.log("PRODUCT ERROR:", e.message);
     return [];
   }

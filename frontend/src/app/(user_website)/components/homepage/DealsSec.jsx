@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import HomeTab from "./HomeTab";
 import Slider from "./Slider";
 import Link from "next/link";
+import { getImageUrl } from "@/app/utils/helper";
 
 function DealsSec({ producte }) {
   const [product, setProduct] = useState(null);
@@ -25,12 +26,15 @@ function DealsSec({ producte }) {
           {product ? (
             <div className="bg-white rounded-[10px] flex flex-col md:flex-row px-4 md:px-6 py-5 h-full">
               {/* Left: Product Images */}
-              <div className="flex flex-col md:flex-row md:flex-1/2 p-3 md:p-5">
+              <Link
+                href={`/product/${product._id}`}
+                className="flex flex-col md:flex-row md:flex-1/2 p-3 md:p-5 hover:opacity-95 transition-opacity"
+              >
                 <div className="flex md:flex-col gap-3 md:gap-y-5 justify-center md:justify-start">
                   {product?.images?.slice(0,3).map((img, i) => (
                     <img
                       key={i}
-                      src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/product/${img}`}
+                      src={getImageUrl(img, "product")}
                       width={60}
                       height={60}
                       className="rounded-[8px]"
@@ -44,23 +48,25 @@ function DealsSec({ producte }) {
                     <div className="bg-[#EBEDF3] w-[25px] h-[25px] md:w-[30px] md:h-[30px] rounded-full"></div>
                   </div>
                   <img
-                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/product/${product?.thumbnail}`}
+                    src={getImageUrl(product?.thumbnail, "product")}
                     width={160}
                     height={160}
                     alt={product?.name}
                     className="object-contain"
                   />
                 </div>
-              </div>
+              </Link>
 
               {/* Right: Info */}
               <div className="flex-1/2 px-2 md:px-5 mt-4 md:mt-0 text-sm">
                 <p className="text-[#666] text-center mb-1">
                   ({product?.colors?.length})
                 </p>
-                <h1 className="font-bold text-[15px] md:text-[16px] mb-2 text-center md:text-left">
-                  {product?.name}
-                </h1>
+                <Link href={`/product/${product._id}`}>
+                  <h1 className="font-bold text-[15px] md:text-[16px] mb-2 text-center md:text-left hover:text-[#01A49E] transition-colors cursor-pointer">
+                    {product?.name}
+                  </h1>
+                </Link>
 
                 <div className="flex flex-wrap justify-center md:justify-start items-center gap-2 mb-2">
                   <h1 className="font-bold text-[#01A49E] text-[15px]">

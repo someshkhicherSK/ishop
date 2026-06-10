@@ -1,7 +1,7 @@
 'use client'
 
 import { addQnty, removeTocart } from "@/app/redux/features/cartSlice";
-import { Axiosinstance, formatCurrencyINR } from "@/app/utils/helper";
+import { Axiosinstance, formatCurrencyINR, getImageUrl } from "@/app/utils/helper";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -76,7 +76,7 @@ function CartItems({ product }) {
                                 <Link href={`/product/${product._id}`} className="flex-shrink-0">
                                     <div className="relative">
                                         <img
-                                            src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/product/${product?.thumbnail}`}
+                                            src={getImageUrl(product?.thumbnail, "product")}
                                             alt={product?.name}
                                             className="w-28 h-28 sm:w-24 sm:h-24 rounded-md object-cover mx-auto sm:mx-0"
                                         />

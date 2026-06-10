@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const categoryModel = require("../models/category.model");
 const brandModel = require("../models/brand.model");
 const colorModel = require("../models/color.model");
@@ -48,14 +49,28 @@ const productController = {
           $lte:max
         }
       }
+      const populateFields = ["categoryId", "BrandId", "colors"];
+
       if (id) {
-        getProduct = await productModel.findById(id).populate(["categoryId", "BrandId", "colors"]);
+        if (mongoose.Types.ObjectId.isValid(id)) {
+          getProduct = await productModel.findById(id).populate(populateFields);
+        }
+        if (!getProduct) {
+          getProduct = await productModel.findOne({ slug: id }).populate(populateFields);
+        }
       } else {
-        getProduct = await productModel.find(filterquery).populate(["categoryId", "BrandId", "colors"])
+        getProduct = await productModel.find(filterquery).populate(populateFields);
       }
+
       if (getProduct) {
-        return res.status(201).json({ msg: "Data Get Successfully...", getProduct });
+        return res.status(200).json({ msg: "Data Get Successfully...", getProduct });
       }
+
+      if (id) {
+        return res.status(404).json({ msg: "Product not found", getProduct: null, success: false });
+      }
+
+      return res.status(200).json({ msg: "Data Get Successfully...", getProduct: [] });
     } catch (error) {
       console.log(error)
       return res.status(501).json({ msg: "Internal Server Error..", success: false });

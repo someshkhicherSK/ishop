@@ -113,11 +113,11 @@ export default function ProductPage() {
                 className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4"
               >
                 <div className="flex items-center gap-3">
-                  <img
-                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/product/${p.thumbnail}`}
-                    alt={p.name}
-                    className="w-16 h-16 object-cover rounded-lg"
-                  />
+                <img
+  src={p.thumbnail}
+  alt={p.name}
+  className="w-16 h-16 object-cover rounded-lg"
+/>
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-800">{p.name}</h3>
                     <p className="text-xs text-gray-500">{p.slug}</p>
@@ -170,10 +170,10 @@ export default function ProductPage() {
                     <td className="px-6 py-4 font-medium">{index + 1}</td>
                     <td className="px-6 py-4">
                       <img
-                        className="w-[40px] h-[40px] rounded-md object-cover"
-                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/product/${p.thumbnail}`}
-                        alt={p.thumbnail}
-                      />
+  className="w-[40px] h-[40px] rounded-md object-cover"
+  src={p.thumbnail}
+  alt={p.thumbnail}
+/>
                     </td>
                     <td className="px-6 py-4">{p.name}</td>
                     <td className="px-6 py-4">{p.slug}</td>
@@ -230,6 +230,8 @@ export default function ProductPage() {
 
 const ViwesCompo = ({ setViweflag, PRODUCT }) => {
   console.log(PRODUCT)
+  console.log("THUMBNAIL =", PRODUCT.thumbnail);
+console.log("IMAGES =", PRODUCT.images);
   return (
     <div className="h-[100%]  bg-gradient-to-b from-white to-slate-50 p-4 md:p-8">
       <div className="flex justify-end px-4 mb-3">
@@ -246,16 +248,20 @@ const ViwesCompo = ({ setViweflag, PRODUCT }) => {
         <div className="rounded-2xl shadow bg-white p-4 md:p-6">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
             <div className="w-full h-[300px] py-4 rounded-2xl bg-slate-100 overflow-hidden flex items-center justify-center">
-              <img
-                src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/product/${PRODUCT.thumbnail}`}
-                alt={PRODUCT.thumbnail}
-                className="h-full w-auto object-cover"
-              />
+            <img
+  src={PRODUCT.thumbnail}
+  alt={PRODUCT.name}
+  className="h-full w-auto object-cover"
+/>
             </div>
             <div className="mt-4 grid grid-cols-4 gap-3">
               {PRODUCT.images.map((src, i) => (
                 <div key={i} className="aspect-square p-4 rounded-xl overflow-hidden ring-1 ring-slate-200">
-                  <img src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/product/${src}`} alt={`thumb-${i}`} className="h-full w-full object-cover" />
+                 <img
+  src={src}
+  alt={`thumb-${i}`}
+  className="h-full w-full object-cover"
+/>
                 </div>
               ))}
             </div>

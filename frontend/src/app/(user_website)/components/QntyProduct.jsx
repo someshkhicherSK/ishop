@@ -7,7 +7,9 @@ import { toast } from 'react-toastify'
 function QntyProduct({ product }) {
     const dispatcher = useDispatch()
     const user = useSelector((state) => state.user.userDetails)
-    const items = useSelector((state) => state.cart.items);
+    const items = useSelector((state) => state.cart?.items ?? []);
+    const cartItem = items.find((item) => item.productId === product._id);
+    const quantity = cartItem?.qnty ?? 1;
     const payloadSend = (flag, product) => {
         if (user != null) {
             Axiosinstance.patch(`/cart/qnty-manage/${user._id}/${product._id}/${flag}`).then((res) => {
@@ -25,10 +27,10 @@ function QntyProduct({ product }) {
     return (
         <div className="flex items-center gap-4 mb-5">
             <button
-                disabled={items.find((item) => item.productId === product._id)?.qnty <= 1 ? true : false}
+                disabled={quantity <= 1}
                 onClick={() => payloadSend("-", product)}
                 className="px-3 py-1 border rounded">-</button>
-            <span className="font-bold">{items.find((item) => item.productId === product._id)?.qnty || 1}</span>
+            <span className="font-bold">{quantity}</span>
             <button onClick={() => payloadSend("+", product)}
                 className="px-3 py-1 border rounded">+</button>
         </div>

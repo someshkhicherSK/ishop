@@ -1,5 +1,6 @@
-
 import { PhoneCall } from "lucide-react";
+
+export const dynamic = "force-dynamic";
 import { getProduct } from "../../../../../library/api_calls";
 import CartBtn from "../../components/CartBtn";
 import ChangeImages from "../../components/ChangeImages";
@@ -16,7 +17,7 @@ export default async function ProductPage({ params }) {
     console.error("Error fetching product:", error.message);
     product = null;
   }
-  if (!product) {
+  if (!product || !product._id) {
     return (
       <div className="px-6 py-10 text-center">
         <NoProductFound />

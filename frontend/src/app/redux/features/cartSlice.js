@@ -23,11 +23,17 @@ export const cartSlice = createSlice({
             localStorage.setItem('cart', JSON.stringify(state))
         },
         lsCartItem: (state) => {
-            const cart = JSON.parse(localStorage.getItem('cart'));
-            if (cart) {
-                state.items = cart.items;
-                state.originalPrice_Total = cart.originalPrice_Total
-                state.finalPrice_Total = cart.finalPrice_Total
+            try {
+                const cart = JSON.parse(localStorage.getItem('cart'));
+                if (cart) {
+                    state.items = Array.isArray(cart.items) ? cart.items : [];
+                    state.originalPrice_Total = cart.originalPrice_Total ?? 0;
+                    state.finalPrice_Total = cart.finalPrice_Total ?? 0;
+                }
+            } catch {
+                state.items = [];
+                state.originalPrice_Total = 0;
+                state.finalPrice_Total = 0;
             }
         },
         removeTocart: (state, { payload }) => {
@@ -41,21 +47,24 @@ export const cartSlice = createSlice({
         },
         addQnty: (state, { payload }) => {
             const { product, flag } = payload
-            const { originalPrice, finalPrice,_id } = product
+            const { originalPrice, finalPrice, _id } = product
+            if (!Array.isArray(state.items)) {
+                state.items = [];
+            }
             const exsiting = state.items.find((item) => item.productId == _id);
-           
+            if (!exsiting) return;
+
             if (flag == "+") {
                 exsiting.qnty++
                 state.originalPrice_Total += originalPrice
                 state.finalPrice_Total += finalPrice
-            } else if (flag == "-") {
+            } else if (flag == "-" && exsiting.qnty > 1) {
                 exsiting.qnty--
-                state.originalPrice_Total -=  originalPrice
+                state.originalPrice_Total -= originalPrice
                 state.finalPrice_Total -= finalPrice
             }
 
             localStorage.setItem('cart', JSON.stringify(state))
-
         },
         emptyCart: (state) => {
                 state.items = [];
