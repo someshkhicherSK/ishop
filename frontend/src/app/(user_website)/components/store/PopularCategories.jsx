@@ -1,3 +1,4 @@
+import { getImageUrl } from "@/app/utils/helper";
 import Link from "next/link";
 
 function PopularCategories({ Categories }) {
@@ -16,7 +17,7 @@ function PopularCategories({ Categories }) {
               {/* Image */}
               <div className="flex justify-center sm:block">
                 <img
-                  src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/categoryImg/${Category.image}`}
+                  src={getImageUrl(Category.image, "categoryImg")}
                   alt={Category.image}
                   className="object-cover w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[60px] md:h-[60px] rounded-full shadow-sm"
                 />

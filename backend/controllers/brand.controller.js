@@ -1,6 +1,7 @@
 const brandModel = require('../models/brand.model');
 const productModel = require("../models/product.model");
-const categoryUniueName = require('../utility/helper');
+const { uploadImage, isRemoteUrl } = require('../utility/uploadImage');
+const path = require('path');
 const fs = require('fs')
 const brandController = {
     async getBrand(req, res) {
@@ -41,22 +42,19 @@ const brandController = {
             if (existing) {
                 return res.status(409).json({ msg: "Brand name must be unique...😥", success: false });
             }
-            const brandLogoName = categoryUniueName(brandLogo.name);
-            const destination = 'public/images/brands/' + brandLogoName;
-            brandLogo.mv(destination, async (error) => {
-                if (error) {
-                    return res.status(500).json({ msg: "File not uploaded...", success: false });
-                }
-            })
+
+            const logo = await uploadImage(brandLogo, "brands");
+
             const createData = await brandModel.create({
                 name,
                 slug,
                 status,
-                logo:brandLogoName,
-            })
-            createData.save();
-            return res.status(201).json({ msg: "Brand Create Successfull...", success: true,createData });
+                logo,
+            });
+
+            return res.status(201).json({ msg: "Brand Create Successfull...", success: true, createData });
         } catch (error) {
+            console.log(error);
             return res.status(501).json({ msg: "Internal Server error...", success: false })
         }
     },
@@ -67,7 +65,12 @@ const brandController = {
             if (!exiting) {
                 return res.status(301).json({ msg: "Data Not Found...", success: false })
             }
-            fs.unlinkSync(`./public/images/brands/${exiting.logo}`)
+            if (exiting.logo && !isRemoteUrl(exiting.logo)) {
+                const logoPath = path.join(__dirname, "..", "public", "images", "brands", exiting.logo);
+                if (fs.existsSync(logoPath)) {
+                    fs.unlinkSync(logoPath);
+                }
+            }
             await brandModel.findByIdAndDelete(id);
             return res.status(201).json({ msg: "Data delete successful...", success: true })
         } catch (error) {
@@ -108,26 +111,12 @@ const brandController = {
             if (slug) update.slug = slug;
             if (status) update.status = status;
             if (brandLogo) {
-                if (existing.logo) {
-                    try {
-                        fs.unlinkSync(`./public/images/brands/${existing.logo}`);
-                    } catch (error) {
-                        return res.status(203).json({ msg: "Old image not found, skipping delete...", success: true });
-                    }
-                }
-                const brandLogoName = categoryUniueName(brandLogo.name);
-                const destination = 'public/images/brands/' + brandLogoName;
-                brandLogo.mv(destination, async (error) => {
-                    if (error) {
-                        return res.status(500).json({ msg: "File not uploaded...", success: false });
-                    }
-                    update.logo = brandLogoName;
-                    const editData = await brandModel.updateOne(
-                        { _id: id },
-                        { $set: update }
-                    );
-                    return res.status(201).json({ msg: "Brands updated successfully 😋", success: true, data: editData });
-                });
+                update.logo = await uploadImage(brandLogo, "brands");
+                const editData = await brandModel.updateOne(
+                    { _id: id },
+                    { $set: update }
+                );
+                return res.status(201).json({ msg: "Brands updated successfully 😋", success: true, data: editData });
             } else {
                 const editData = await brandModel.updateOne(
                     { _id: id },

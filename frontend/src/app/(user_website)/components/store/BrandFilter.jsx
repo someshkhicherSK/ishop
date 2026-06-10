@@ -1,4 +1,5 @@
 'use client'
+import { getImageUrl } from "@/app/utils/helper";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -24,7 +25,7 @@ function BrandFilter({ Brands }) {
                             <input type="radio" name="brand" />
                             <div className=" rounded-[5px] py-[1px] px-2">
                                 <img
-                                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/brands/${item.logo}`}
+                                    src={getImageUrl(item.logo, "brands")}
                                     alt={item.name}
                                     width={30}
                                     height={20}

@@ -174,7 +174,7 @@
 
 "use client";
 
-import { Axiosinstance, helper } from "@/app/utils/helper";
+import { Axiosinstance, getImageUrl, helper } from "@/app/utils/helper";
 import { PenIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -349,7 +349,7 @@ export default function Page() {
               className="w-[80px] h-auto"
               src={
                 brand?.logo
-                  ? `${process.env.NEXT_PUBLIC_API_BASE_URL}images/brands/${brand.logo}`
+                  ? getImageUrl(brand.logo, "brands")
                   : "/no-image.png"
               }
               alt="brand"

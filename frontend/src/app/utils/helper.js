@@ -69,4 +69,15 @@ const Axiosinstance = axios.create({
   withCredentials: true,
 });
 
-export { Axiosinstance, getCokies, formatCurrencyINR };
+function getImageUrl(image, folder) {
+  if (!image) return "";
+
+  if (image.startsWith("http://") || image.startsWith("https://")) {
+    return image;
+  }
+
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  return `${base}images/${folder}/${image}`;
+}
+
+export { Axiosinstance, getCokies, formatCurrencyINR, getImageUrl };

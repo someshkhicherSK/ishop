@@ -260,7 +260,7 @@
 
 "use client";
 
-import { Axiosinstance, helper } from "@/app/utils/helper";
+import { Axiosinstance, getImageUrl, helper } from "@/app/utils/helper";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -392,11 +392,10 @@ return ( <div className="min-h-screen bg-slate-100 p-6"> <div className="max-w-3
           </label>
 
         <img
-          src={cat.image}
-
-  alt={cat.name}
-  className="w-32 h-32 object-cover rounded-xl border"
-/>
+          src={getImageUrl(cat.image, "categoryImg")}
+          alt={cat.name}
+          className="w-32 h-32 object-cover rounded-xl border"
+        />
         </div>
 
         <div>

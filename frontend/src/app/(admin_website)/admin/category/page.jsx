@@ -123,7 +123,7 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import { Axiosinstance } from "@/app/utils/helper";
+import { Axiosinstance, getImageUrl } from "@/app/utils/helper";
 import { toast } from "react-toastify";
 
 export default function CategoryPage() {
@@ -209,11 +209,11 @@ export default function CategoryPage() {
                     </td>
 
                     <td className="p-4">
-                     <img
-  src={cat.image}
-  alt={cat.name}
-  className="w-16 h-16 rounded-xl object-cover border shadow-sm"
-/>
+                      <img
+                        src={getImageUrl(cat.image, "categoryImg")}
+                        alt={cat.name}
+                        className="w-16 h-16 rounded-xl object-cover border shadow-sm"
+                      />
                     </td>
 
                     <td className="p-4 font-medium text-slate-800">

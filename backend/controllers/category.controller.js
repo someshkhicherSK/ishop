@@ -172,10 +172,11 @@
 
 
 
-const imagekit = require("../utility/imagekit");
+const { uploadImage, isRemoteUrl } = require("../utility/uploadImage");
 const Category = require("../models/category.model");
 const Product = require("../models/product.model");
 const fs = require("fs");
+const path = require("path");
 
 exports.getCategory = async (req, res) => {
   const cats = await Category.find();
@@ -287,32 +288,26 @@ exports.getSingleCategory = async (req, res) => {
 
 exports.createCategory = async (req, res) => {
   try {
-    console.log("CREATE CATEGORY HIT");
-
     const { name, slug } = req.body;
-    const img = req.files.image;
+    const img = req.files?.image;
 
-    console.log("IMAGE NAME =", img.name);
+    if (!img) {
+      return res.status(400).send({ msg: "Image is required" });
+    }
 
-    const upload = await imagekit.upload({
-      file: img.data,
-      fileName: Date.now() + "-" + img.name,
-      folder: "/categories",
-    });
-
-    console.log("UPLOAD SUCCESS =", upload);
+    const image = await uploadImage(img, "categoryImg");
 
     await Category.create({
       name,
       slug,
-      image: upload.url,
+      image,
     });
 
     res.send({
       msg: "created",
     });
   } catch (error) {
-    console.log("IMAGEKIT ERROR =", error);
+    console.log("CATEGORY UPLOAD ERROR =", error);
 
     res.status(500).send({
       msg: error.message,
@@ -369,15 +364,7 @@ exports.updateCategory = async (req, res) => {
     };
 
     if (req.files && req.files.image) {
-      const img = req.files.image;
-
-      const upload = await imagekit.upload({
-        file: img.data,
-        fileName: Date.now() + "-" + img.name,
-        folder: "/categories",
-      });
-
-      updateObj.image = upload.url;
+      updateObj.image = await uploadImage(req.files.image, "categoryImg");
     }
 
     await Category.findByIdAndUpdate(
@@ -418,8 +405,15 @@ exports.status = async (req, res) => {
 exports.deleteCategory = async (req, res) => {
   const cat = await Category.findById(req.params.id);
 
-  if (cat?.image) {
-    const oldPath = "./public/images/categoryImg/" + cat.image;
+  if (cat?.image && !isRemoteUrl(cat.image)) {
+    const oldPath = path.join(
+      __dirname,
+      "..",
+      "public",
+      "images",
+      "categoryImg",
+      cat.image
+    );
 
     if (fs.existsSync(oldPath)) {
       fs.unlinkSync(oldPath);

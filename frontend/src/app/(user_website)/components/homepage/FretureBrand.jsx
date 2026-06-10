@@ -1,5 +1,6 @@
 'use client'
 
+import { getImageUrl } from "@/app/utils/helper";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -46,7 +47,7 @@ function FretureBrand({ Brands, Categories }) {
             <img
               onClick={() => setSelBrand(item.slug)}
               key={item._id}
-              src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/brands/${item.logo}`}
+              src={getImageUrl(item.logo, "brands")}
               width={70}
               height={100}
               style={{ height: "auto" }}
@@ -88,7 +89,7 @@ function FretureBrand({ Brands, Categories }) {
                 <div className="w-[60px] h-[60px] sm:w-[70px] sm:h-[70px] flex justify-center items-center">
                   <img
                     className="rounded-full h-full w-full object-cover"
-                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/categoryImg/${item.image}`}
+                    src={getImageUrl(item.image, "categoryImg")}
                     alt={item.name}
                   />
                 </div>

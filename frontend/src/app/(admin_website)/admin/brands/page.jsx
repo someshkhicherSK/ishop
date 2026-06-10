@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import { TbCategory2 } from "react-icons/tb";
-import { Axiosinstance } from "@/app/utils/helper";
+import { Axiosinstance, getImageUrl } from "@/app/utils/helper";
 import Swal from "sweetalert2";
 
 export default function BrandsPage() {
@@ -141,7 +141,7 @@ export default function BrandsPage() {
                     <td className="px-6 py-4">
                       <img
                         className="w-[40px] h-[40px] object-contain rounded-lg border"
-                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/brands/${brand.logo}`}
+                        src={getImageUrl(brand.logo, "brands")}
                         alt={brand.name}
                       />
                     </td>
@@ -198,7 +198,7 @@ export default function BrandsPage() {
                     <p className="text-sm text-gray-500 mt-1">{brand.slug}</p>
                   </div>
                   <img
-                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/brands/${brand.logo}`}
+                    src={getImageUrl(brand.logo, "brands")}
                     alt={brand.name}
                     className="w-12 h-12 object-contain rounded-md border"
                   />
