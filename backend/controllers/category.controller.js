@@ -172,7 +172,7 @@
 
 
 
-
+const imagekit = require("../utility/imagekit");
 const Category = require("../models/category.model");
 const Product = require("../models/product.model");
 const fs = require("fs");
@@ -202,32 +202,168 @@ exports.getSingleCategory = async (req, res) => {
   }
 };
 
+
+// exports.createCategory = async (req, res) => {
+//   const { name, slug } = req.body;
+//   const img = req.files.image;
+
+//   const filename = Date.now() + img.name;
+
+//   img.mv("./public/images/categoryImg/" + filename);
+
+//   await Category.create({
+//     name,
+//     slug,
+//     image: filename,
+//   });
+
+//   res.send({
+//     msg: "created",
+//   });
+// };
+// exports.createCategory = async (req, res) => {
+//     console.log("CREATE CATEGORY API HIT");
+
+//   try {
+//     const { name, slug } = req.body;
+//     const img = req.files.image;
+//     console.log("Image =", img?.name);
+
+//     const filename = Date.now() + img.name;
+
+//     console.log("Saving File =", filename);
+
+//     img.mv("./public/images/categoryImg/" + filename, (err) => {
+//       if (err) {
+//         console.log("Upload Error =", err);
+//       } else {
+//         console.log("Uploaded Successfully");
+//       }
+//     });
+
+//     await Category.create({
+//       name,
+//       slug,
+//       image: filename,
+//     });
+
+//     res.send({
+//       msg: "created",
+//     });
+//   } catch (error) {
+//     res.status(500).send({
+//       msg: error.message,
+//     });
+//   }
+// };
+// exports.createCategory = async (req, res) => {
+//   try {
+//     const { name, slug } = req.body;
+
+//     const img = req.files.image;
+
+//     const upload = await imagekit.upload({
+//       file: img.data,
+//       fileName: Date.now() + "-" + img.name,
+//       folder: "/categories",
+//     });
+
+//     await Category.create({
+//       name,
+//       slug,
+//       image: upload.url,
+//     });
+
+//     res.send({
+//       msg: "created",
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({
+//       msg: error.message,
+//     });
+//   }
+// };
+
 exports.createCategory = async (req, res) => {
-  const { name, slug } = req.body;
-  const img = req.files.image;
+  try {
+    console.log("CREATE CATEGORY HIT");
 
-  const filename = Date.now() + img.name;
+    const { name, slug } = req.body;
+    const img = req.files.image;
 
-  img.mv("./public/images/categoryImg/" + filename);
+    console.log("IMAGE NAME =", img.name);
 
-  await Category.create({
-    name,
-    slug,
-    image: filename,
-  });
+    const upload = await imagekit.upload({
+      file: img.data,
+      fileName: Date.now() + "-" + img.name,
+      folder: "/categories",
+    });
 
-  res.send({
-    msg: "created",
-  });
+    console.log("UPLOAD SUCCESS =", upload);
+
+    await Category.create({
+      name,
+      slug,
+      image: upload.url,
+    });
+
+    res.send({
+      msg: "created",
+    });
+  } catch (error) {
+    console.log("IMAGEKIT ERROR =", error);
+
+    res.status(500).send({
+      msg: error.message,
+    });
+  }
 };
+// exports.updateCategory = async (req, res) => {
+//   try {
+//     const { name, slug } = req.body;
 
+//     const cat = await Category.findById(req.params.id);
+
+//     let updateObj = {
+//       name,
+//       slug,
+//     };
+
+//     if (req.files && req.files.image) {
+//       const img = req.files.image;
+
+//       const filename = Date.now() + img.name;
+
+//       img.mv("./public/images/categoryImg/" + filename);
+
+//       if (cat.image) {
+//         const oldPath = "./public/images/categoryImg/" + cat.image;
+
+//         if (fs.existsSync(oldPath)) {
+//           fs.unlinkSync(oldPath);
+//         }
+//       }
+
+//       updateObj.image = filename;
+//     }
+
+//     await Category.findByIdAndUpdate(req.params.id, updateObj);
+
+//     res.send({
+//       msg: "updated",
+//     });
+//   } catch (error) {
+//     res.status(500).send({
+//       msg: error.message,
+//     });
+//   }
+// };
 exports.updateCategory = async (req, res) => {
   try {
     const { name, slug } = req.body;
 
-    const cat = await Category.findById(req.params.id);
-
-    let updateObj = {
+    const updateObj = {
       name,
       slug,
     };
@@ -235,33 +371,31 @@ exports.updateCategory = async (req, res) => {
     if (req.files && req.files.image) {
       const img = req.files.image;
 
-      const filename = Date.now() + img.name;
+      const upload = await imagekit.upload({
+        file: img.data,
+        fileName: Date.now() + "-" + img.name,
+        folder: "/categories",
+      });
 
-      img.mv("./public/images/categoryImg/" + filename);
-
-      if (cat.image) {
-        const oldPath = "./public/images/categoryImg/" + cat.image;
-
-        if (fs.existsSync(oldPath)) {
-          fs.unlinkSync(oldPath);
-        }
-      }
-
-      updateObj.image = filename;
+      updateObj.image = upload.url;
     }
 
-    await Category.findByIdAndUpdate(req.params.id, updateObj);
+    await Category.findByIdAndUpdate(
+      req.params.id,
+      updateObj
+    );
 
     res.send({
       msg: "updated",
     });
   } catch (error) {
+    console.log(error);
+
     res.status(500).send({
       msg: error.message,
     });
   }
 };
-
 exports.status = async (req, res) => {
   const { flag } = req.body;
 

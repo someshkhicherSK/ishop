@@ -392,7 +392,8 @@ return ( <div className="min-h-screen bg-slate-100 p-6"> <div className="max-w-3
           </label>
 
         <img
-  src={`${process.env.NEXT_PUBLIC_API_BASE_URL}images/categoryImg/${cat.image}`}
+          src={cat.image}
+
   alt={cat.name}
   className="w-32 h-32 object-cover rounded-xl border"
 />
