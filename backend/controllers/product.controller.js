@@ -2,15 +2,19 @@ const categoryModel = require("../models/category.model");
 const brandModel = require("../models/brand.model");
 const colorModel = require("../models/color.model");
 const productModel = require("../models/product.model");
-const categoryUniueName = require("../utility/helper")
-const fs = require('fs')
+const { uploadImage, isRemoteUrl } = require("../utility/uploadImage");
+const path = require("path");
+const fs = require("fs");
 
-const savefile = async (imageObj) => {
-  const imageName = categoryUniueName(imageObj.name);
-  const destination = 'public/images/product/' + imageName;
-  await imageObj.mv(destination);
-  return imageName;
-}
+const savefile = async (imageObj) => uploadImage(imageObj, "product");
+
+const parseBool = (value, fallback = false) =>
+  value === true || value === "true";
+
+const getImageFiles = (files) => {
+  if (!files) return [];
+  return Array.isArray(files) ? files : [files];
+};
 const productController = {
   async getProduct(req, res) {
     const { id } = req.params;
@@ -59,27 +63,71 @@ const productController = {
   },
   async createProduct(req, res) {
     try {
-      const name = req.body.name;
+      const {
+        name,
+        slug,
+        shortDescription,
+        longDescription,
+        originalPrice,
+        discountPercentage,
+        finalPrice,
+        categoryId,
+        BrandId,
+        colors,
+        stock,
+        topSelling,
+        status,
+      } = req.body;
+
+      if (!name || !slug || !categoryId || !BrandId) {
+        return res.status(400).json({
+          msg: "Name, slug, category and brand are required",
+          success: false,
+        });
+      }
+
+      if (!req.files?.thumbnail) {
+        return res.status(400).json({
+          msg: "Thumbnail image is required",
+          success: false,
+        });
+      }
+
       const existing = await productModel.findOne({ name });
       if (existing) {
         return res.status(301).json({ msg: "Product Already Exsiting...😢", success: false });
       }
-      const thumbnail = req.files.thumbnail ? await savefile(req.files.thumbnail) : null;
+
+      const thumbnail = await savefile(req.files.thumbnail);
       const images = req.files?.images
-        ? await Promise.all(
-          (Array.isArray(req.files.images)
-            ?
-            req.files.images
-            : [req.files.images]
-          ).map((img) => savefile(img))
-        )
-        :
-        []
-      await productModel.create({ ...req.body, colors: req.body.colors ? JSON.parse(req.body.colors) : [], thumbnail, images })
+        ? await Promise.all(getImageFiles(req.files.images).map((img) => savefile(img)))
+        : [];
+
+      await productModel.create({
+        name,
+        slug,
+        shortDescription,
+        longDescription,
+        originalPrice: Number(originalPrice) || 200,
+        discountPercentage: Number(discountPercentage) || 0,
+        finalPrice: Number(finalPrice) || Number(originalPrice) || 200,
+        categoryId,
+        BrandId,
+        colors: colors ? JSON.parse(colors) : [],
+        thumbnail,
+        images,
+        stock: parseBool(stock, true),
+        topSelling: parseBool(topSelling, false),
+        status: parseBool(status, true),
+      });
+
       return res.status(201).json({ msg: "Product Create Successful...😘", success: true });
     } catch (error) {
-      console.log(error)
-      return res.status(501).json({ msg: "Internal Server Error...", success: false });
+      console.log("CREATE PRODUCT ERROR:", error);
+      return res.status(500).json({
+        msg: error.message || "Internal Server Error...",
+        success: false,
+      });
     }
   },
   async updateProduct(req, res) {
@@ -115,21 +163,21 @@ const productController = {
       if (!product) {
         return res.status(301).json({ msg: "product not found...", success: false });
       }
-      if (product.thumbnail) {
-        fs.unlinkSync(`./public/images/product/${product.thumbnail}`);
-      } else {
-        return res.status(303).json({ msg: "thumbnail not found...", success: false });
+      if (product.thumbnail && !isRemoteUrl(product.thumbnail)) {
+        const filePath = path.join(__dirname, "..", "public", "images", "product", product.thumbnail);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
       }
-      if (product.images && product.images.length > 0) {
-        // await Promise.all(product.images.map((img)=>deleteFile(img)))
+
+      if (product.images?.length) {
         for (const img of product.images) {
-          const filePath = `./public/images/product/${img}`
+          if (isRemoteUrl(img)) continue;
+          const filePath = path.join(__dirname, "..", "public", "images", "product", img);
           if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
           }
         }
-      } else {
-        return res.status(304).json({ msg: "imagse not found...", success: false });
       }
       await productModel.findByIdAndDelete(id);
       return res.status(201).json({ msg: "product delete successful...", success: true });
@@ -147,11 +195,10 @@ const productController = {
       }
       let thumbnail = existing.thumbnail;
       if (req.files?.thumbnail) {
-        if (existing.thumbnail) {
-          try {
-            fs.unlinkSync(`./public/images/product/${existing.thumbnail}`);
-          } catch (error) {
-            res.status(301).json({ msg: "thumbnail not found...", success: false });
+        if (existing.thumbnail && !isRemoteUrl(existing.thumbnail)) {
+          const oldThumb = path.join(__dirname, "..", "public", "images", "product", existing.thumbnail);
+          if (fs.existsSync(oldThumb)) {
+            fs.unlinkSync(oldThumb);
           }
         }
         thumbnail = await savefile(req.files.thumbnail);
@@ -159,32 +206,48 @@ const productController = {
 
       let images = existing.images || [];
       if (req.files?.images) {
-        if (existing.images && existing.images.length > 0) {
-          existing.images.forEach(img => {
-            try {
-              fs.unlinkSync(`./public/images/product/${img}`)
-            } catch (error) {
-              return res.status(304).json({ msg: "product Images not found...", success: false });
+        if (existing.images?.length) {
+          existing.images.forEach((img) => {
+            if (isRemoteUrl(img)) return;
+            const filePath = path.join(__dirname, "..", "public", "images", "product", img);
+            if (fs.existsSync(filePath)) {
+              fs.unlinkSync(filePath);
             }
-          })
+          });
         }
         images = await Promise.all(
-          (Array.isArray(req.files.images) ? req.files.images : [req.files.images]).map((img) => savefile(img))
-        )
+          getImageFiles(req.files.images).map((img) => savefile(img))
+        );
       }
+
       const update = {
-        ...req.body,
+        name: req.body.name ?? existing.name,
+        slug: req.body.slug ?? existing.slug,
+        shortDescription: req.body.shortDescription ?? existing.shortDescription,
+        longDescription: req.body.longDescription ?? existing.longDescription,
+        originalPrice: Number(req.body.originalPrice ?? existing.originalPrice),
+        discountPercentage: Number(req.body.discountPercentage ?? existing.discountPercentage),
+        finalPrice: Number(req.body.finalPrice ?? existing.finalPrice),
+        categoryId: req.body.categoryId ?? existing.categoryId,
+        BrandId: req.body.BrandId ?? existing.BrandId,
         colors: req.body.colors ? JSON.parse(req.body.colors) : existing.colors,
+        stock: req.body.stock !== undefined ? parseBool(req.body.stock, existing.stock) : existing.stock,
+        topSelling: req.body.topSelling !== undefined ? parseBool(req.body.topSelling, existing.topSelling) : existing.topSelling,
+        status: req.body.status !== undefined ? parseBool(req.body.status, existing.status) : existing.status,
         thumbnail,
-        images
-      }
+        images,
+      };
       await productModel.findByIdAndUpdate(id, {
         $set: update,
       })
       return res.status(201).json({ msg: "Product Update Successfull...😊", success: true });
 
     } catch (error) {
-      return res.status(501).json({ msg: "Internal Server Error..", success: false });
+      console.log("EDIT PRODUCT ERROR:", error);
+      return res.status(500).json({
+        msg: error.message || "Internal Server Error..",
+        success: false,
+      });
     }
   }
 

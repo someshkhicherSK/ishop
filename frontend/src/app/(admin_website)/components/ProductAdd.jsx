@@ -1,7 +1,7 @@
 'use client'
 import { Axiosinstance, getCokies, helper } from "@/app/utils/helper";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Select from 'react-select'
 import TextEditor from "./TextEditor";
 import { toast } from "react-toastify";
@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 export default function ProductForm({ category, brands, color }) {
     const router = useRouter();
     const [selClr, setSelCrl] = useState([]);
+    const [selCategory, setSelCategory] = useState(null);
+    const [selBrand, setSelBrand] = useState(null);
     const [longDesc, setLongDes] = useState('')
     const nameRfe = useRef(null);
     const slugRfe = useRef(null);
@@ -29,14 +31,32 @@ export default function ProductForm({ category, brands, color }) {
         slugRfe.current.value = slug;
     };
     const priceCalclute = () => {
-        const op = originalPriceRfe.current.value;
-        const dp = discoutRfe.current.value;
+        const op = Number(originalPriceRfe.current.value) || 0;
+        const dp = Number(discoutRfe.current.value) || 0;
         const fp = op - (op * dp) / 100;
         finalPriceRfe.current.value = fp.toFixed();
     }
+
+    useEffect(() => {
+        priceCalclute();
+    }, []);
+
     const formHandler = (e) => {
         e.preventDefault();
-        const token = getCokies('admin_token')
+
+        if (!selCategory?.value || !selBrand?.value) {
+            toast.warning("Please select category and brand");
+            return;
+        }
+
+        if (!e.target.thumbnail.files[0]) {
+            toast.warning("Please upload a thumbnail image");
+            return;
+        }
+
+        priceCalclute();
+
+        const token = getCokies('admin_token');
         const formData = new FormData();
         formData.append("name", nameRfe.current.value);
         formData.append("slug", slugRfe.current.value);
@@ -45,37 +65,31 @@ export default function ProductForm({ category, brands, color }) {
         formData.append("originalPrice", originalPriceRfe.current.value);
         formData.append("discountPercentage", discoutRfe.current.value);
         formData.append("finalPrice", finalPriceRfe.current.value);
-        formData.append("categoryId", e.target.categoryId.value);
-        formData.append("BrandId", e.target.BrandId.value);
+        formData.append("categoryId", selCategory.value);
+        formData.append("BrandId", selBrand.value);
         formData.append("colors", JSON.stringify(selClr));
         formData.append("thumbnail", e.target.thumbnail.files[0]);
-        formData.append("stock", stockRfe.current.checked ? true : false);
-        formData.append("topSelling", topsellingRfe.current.checked ? true : false);
-        formData.append("status", statusRfe.current.checked ? true : false);
-        //All Done !
+        formData.append("stock", stockRfe.current.checked);
+        formData.append("topSelling", topsellingRfe.current.checked);
+        formData.append("status", statusRfe.current.checked);
+
         for (let img of e.target.images.files) {
             formData.append("images", img);
         }
 
-
-        Axiosinstance.post("product/create", formData , {
-            headers:{
-                Authorization:token
+        Axiosinstance.post("product/create", formData, {
+            headers: {
+                Authorization: token
             }
         }).then((res) => {
             if (res.status == 201) {
-                toast.success(res.data.msg)
+                toast.success(res.data.msg);
                 setTimeout(() => {
                     router.push('/admin/product');
-                }, 5000);
+                }, 2000);
             }
         }).catch((err) => {
-            if (err.response.status == 301) {
-                toast.warning(err.response.data.msg)
-            }
-            else {
-                toast.warning(err.response.data.msg)
-            }
+            toast.warning(err?.response?.data?.msg || "Product add failed");
         });
 
     };
@@ -185,13 +199,15 @@ export default function ProductForm({ category, brands, color }) {
                 <div>
                     <label className="block text-sm font-medium mb-1">Category</label>
                     <Select
-                        name="categoryId"
                         instanceId="category-select"
                         placeholder="-- Category Selector --"
+                        value={selCategory}
+                        onChange={setSelCategory}
                         options={
-                            category?.data?.map((category) => {
-                                return { value: category._id, label: category.name }
-                            })
+                            category?.data?.map((item) => ({
+                                value: item._id,
+                                label: item.name,
+                            })) || []
                         } />
                 </div>
 
@@ -199,13 +215,15 @@ export default function ProductForm({ category, brands, color }) {
                 <div>
                     <label className="block text-sm font-medium mb-1">Brand</label>
                     <Select
-                        name="BrandId"
                         instanceId="Brands-select"
                         placeholder="-- Brands Selector --"
+                        value={selBrand}
+                        onChange={setSelBrand}
                         options={
-                            brands?.data?.map((brand) => {
-                                return { value: brand._id, label: brand.name }
-                            })
+                            brands?.data?.map((brand) => ({
+                                value: brand._id,
+                                label: brand.name,
+                            })) || []
                         } />
                 </div>
 

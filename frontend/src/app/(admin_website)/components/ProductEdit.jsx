@@ -13,6 +13,8 @@ export default function ProductEdit({ color, brands, category }) {
     const [product, setProduct] = useState({})
     const router = useRouter();
     const [selClr, setSelCrl] = useState([]);
+    const [selCategory, setSelCategory] = useState(null);
+    const [selBrand, setSelBrand] = useState(null);
     const [longDesc, setLongDes] = useState('')
     const nameRfe = useRef(null);
     const slugRfe = useRef(null);
@@ -46,8 +48,13 @@ export default function ProductEdit({ color, brands, category }) {
         formData.append("originalPrice", originalPriceRfe.current.value);
         formData.append("discountPercentage", discoutRfe.current.value);
         formData.append("finalPrice", finalPriceRfe.current.value);
-        formData.append("categoryId", e.target.categoryId.value);
-        formData.append("BrandId", e.target.BrandId.value);
+        if (!selCategory?.value || !selBrand?.value) {
+            toast.warning("Please select category and brand");
+            return;
+        }
+
+        formData.append("categoryId", selCategory.value);
+        formData.append("BrandId", selBrand.value);
         formData.append("colors", JSON.stringify(selClr));
         formData.append("thumbnail", e.target.thumbnail.files[0]);
         formData.append("stock", stockRfe.current.checked ? true : false);
@@ -68,12 +75,7 @@ export default function ProductEdit({ color, brands, category }) {
                     }, 5000);
                 }
             }).catch((err) => {
-                if (err.response.status == 301) {
-                    toast.warning(err.response.data.msg)
-                }
-                else {
-                    toast.warning(err.response.data.msg)
-                }
+                toast.warning(err?.response?.data?.msg || "Product update failed");
             });
 
     };
@@ -82,9 +84,31 @@ export default function ProductEdit({ color, brands, category }) {
         const fetchData = async () => {
             const res = await getProduct(product_id);
             setProduct(res);
+
+            if (res?.categoryId) {
+                setSelCategory({
+                    value: res.categoryId._id || res.categoryId,
+                    label: res.categoryId.name || "Selected category",
+                });
+            }
+
+            if (res?.BrandId) {
+                setSelBrand({
+                    value: res.BrandId._id || res.BrandId,
+                    label: res.BrandId.name || "Selected brand",
+                });
+            }
+
+            if (res?.colors?.length) {
+                setSelCrl(res.colors.map((clr) => clr._id || clr));
+            }
+
+            if (res?.longDescription) {
+                setLongDes(res.longDescription);
+            }
         };
         fetchData();
-    }, []);
+    }, [product_id]);
 
 
 
@@ -195,13 +219,15 @@ export default function ProductEdit({ color, brands, category }) {
                 <div>
                     <label className="block text-sm font-medium mb-1">Category</label>
                     <Select
-                        name="categoryId"
                         instanceId="category-select"
                         placeholder="-- Category Selector --"
+                        value={selCategory}
+                        onChange={setSelCategory}
                         options={
-                            category?.data?.map((category) => {
-                                return { value: category._id, label: category.name }
-                            })
+                            category?.data?.map((item) => ({
+                                value: item._id,
+                                label: item.name,
+                            })) || []
                         } />
                 </div>
 
@@ -209,13 +235,15 @@ export default function ProductEdit({ color, brands, category }) {
                 <div>
                     <label className="block text-sm font-medium mb-1">Brand</label>
                     <Select
-                        name="BrandId"
                         instanceId="Brands-select"
                         placeholder="-- Brands Selector --"
+                        value={selBrand}
+                        onChange={setSelBrand}
                         options={
-                            brands?.data?.map((brand) => {
-                                return { value: brand._id, label: brand.name }
-                            })
+                            brands?.data?.map((brand) => ({
+                                value: brand._id,
+                                label: brand.name,
+                            })) || []
                         } />
                 </div>
 
