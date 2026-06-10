@@ -1,14 +1,5 @@
 const { isRemoteUrl } = require("./uploadImage");
-
-function getBackendBaseUrl() {
-  const base =
-    process.env.PUBLIC_API_URL ||
-    process.env.RENDER_EXTERNAL_URL ||
-    process.env.BACKEND_URL ||
-    "http://localhost:5000/";
-
-  return base.endsWith("/") ? base : `${base}/`;
-}
+const { getBackendBaseUrl } = require("./gridfsStorage");
 
 function resolvePublicImageUrl(image, folder) {
   if (!image) return image;

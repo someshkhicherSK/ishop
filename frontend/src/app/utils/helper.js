@@ -64,9 +64,16 @@ function formatCurrencyINR(amount) {
   }).format(amount);
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
+if (!API_BASE_URL && typeof window === "undefined") {
+  console.warn("NEXT_PUBLIC_API_BASE_URL is missing on server");
+}
+
 const Axiosinstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: API_BASE_URL,
   withCredentials: true,
+  timeout: 30000,
 });
 
 function getImageUrl(image, folder) {

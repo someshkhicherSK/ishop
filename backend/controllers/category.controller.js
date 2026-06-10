@@ -180,8 +180,13 @@ const fs = require("fs");
 const path = require("path");
 
 exports.getCategory = async (req, res) => {
-  const cats = await Category.find();
-  res.send({ data: cats.map(resolveCategoryImage) });
+  try {
+    const cats = await Category.find().sort({ createdAt: -1 });
+    res.status(200).send({ data: cats.map(resolveCategoryImage) });
+  } catch (error) {
+    console.log("GET CATEGORY ERROR:", error);
+    res.status(500).send({ data: [], msg: error.message });
+  }
 };
 
 exports.getSingleCategory = async (req, res) => {
@@ -304,14 +309,16 @@ exports.createCategory = async (req, res) => {
       image,
     });
 
-    res.send({
-      msg: "created",
+    res.status(201).send({
+      msg: "Category created successfully",
+      success: true,
     });
   } catch (error) {
     console.log("CATEGORY UPLOAD ERROR =", error);
 
     res.status(500).send({
-      msg: error.message,
+      msg: error.message || "Failed to create category",
+      success: false,
     });
   }
 };

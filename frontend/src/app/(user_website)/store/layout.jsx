@@ -6,6 +6,9 @@ import BrandFilter from "../components/store/BrandFilter";
 import PriceFilter from "../components/store/PriceFilter";
 import ColorFillter from "../components/store/ColorFillter";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function layout({ children }) {
   const Categories = await getCategory(null);
   const Brands = await getBrands(null);

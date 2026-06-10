@@ -12,6 +12,7 @@ import { getCategory } from "../../../../../library/api_calls";
 
 async function Footer() {
   const category = await getCategory();
+  const categoryList = category?.data || [];
 
   const socailLink = [
     {
@@ -80,7 +81,7 @@ async function Footer() {
               <h3 className="text-lg font-semibold mb-3 capitalize">
                 top Categories
               </h3>
-              {category?.data?.slice(0, 10).map((item, i) => (
+              {categoryList?.slice(0, 10).map((item, i) => (
                 <Link key={i} href={`/store/${item.slug}`}>
                   <li className="text-sm text-[#666666]">
                     {item.name}

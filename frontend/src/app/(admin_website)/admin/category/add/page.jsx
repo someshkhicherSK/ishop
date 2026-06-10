@@ -30,7 +30,9 @@ export default function AddCategory() {
         toast.success("Category Added");
         router.push("/admin/category");
       })
-      .catch(() => toast.error("Error"));
+      .catch((err) => {
+        toast.error(err?.response?.data?.msg || "Category add failed");
+      });
   };
 
   return (

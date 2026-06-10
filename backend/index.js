@@ -123,6 +123,7 @@ const userRoutes = require("./routes/user.routes");
 const cartRoutes = require("./routes/cart.routes");
 const orderRoutes = require("./routes/order.routes");
 const contactRoutes = require("./routes/contact.routes");
+const { streamGridFSFile } = require("./utility/gridfsStorage");
 
 const server = express();
 
@@ -169,6 +170,14 @@ server.use("/user", userRoutes);
 server.use("/cart", cartRoutes);
 server.use("/order", orderRoutes);
 server.use("/contact", contactRoutes);
+
+server.get("/media/:id", (req, res) => {
+  try {
+    streamGridFSFile(req.params.id, res);
+  } catch (error) {
+    res.status(404).json({ msg: "File not found" });
+  }
+});
 
 server.use(express.static("./public"));
 

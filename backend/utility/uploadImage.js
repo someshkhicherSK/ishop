@@ -22,6 +22,18 @@ function isRemoteUrl(value) {
   );
 }
 
+async function getFileBuffer(file) {
+  if (file.data?.length) {
+    return file.data;
+  }
+
+  if (file.tempFilePath) {
+    return fs.promises.readFile(file.tempFilePath);
+  }
+
+  throw new Error("Uploaded file is empty");
+}
+
 async function saveLocalImage(file, folder) {
   const filename = categoryUniqueName(file.name);
   const dir = path.join(__dirname, "..", "public", "images", folder);
@@ -30,16 +42,14 @@ async function saveLocalImage(file, folder) {
     fs.mkdirSync(dir, { recursive: true });
   }
 
-  await file.mv(path.join(dir, filename));
-  return filename;
-}
+  if (file.tempFilePath) {
+    await file.mv(path.join(dir, filename));
+  } else {
+    const buffer = await getFileBuffer(file);
+    await fs.promises.writeFile(path.join(dir, filename), buffer);
+  }
 
-function isProductionDeploy() {
-  return (
-    process.env.NODE_ENV === "production" ||
-    process.env.RENDER === "true" ||
-    Boolean(process.env.RENDER_EXTERNAL_URL)
-  );
+  return filename;
 }
 
 async function uploadImage(file, folder) {
@@ -47,27 +57,31 @@ async function uploadImage(file, folder) {
     throw new Error("No file provided");
   }
 
-  const client = getImageKitClient();
   const safeName = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
-
-  if (!client && isProductionDeploy()) {
-    throw new Error(
-      "IMAGEKIT_PRIVATE_KEY is required on Render/production for permanent image storage"
-    );
-  }
+  const buffer = await getFileBuffer(file);
+  const client = getImageKitClient();
 
   if (client) {
-    const upload = await client.files.upload({
-      file: file.data,
-      fileName: safeName,
-      folder: `/${folder}`,
-    });
+    try {
+      const upload = await client.files.upload({
+        file: buffer,
+        fileName: safeName,
+        folder: `/${folder}`,
+      });
 
-    if (!upload?.url) {
-      throw new Error("Image upload failed");
+      if (upload?.url) {
+        return upload.url;
+      }
+    } catch (error) {
+      console.log("ImageKit upload failed, using MongoDB storage:", error.message);
     }
+  }
 
-    return upload.url;
+  try {
+    const { uploadToGridFS } = require("./gridfsStorage");
+    return await uploadToGridFS(file, folder);
+  } catch (error) {
+    console.log("GridFS upload failed, using local storage:", error.message);
   }
 
   return saveLocalImage(file, folder);

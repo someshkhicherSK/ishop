@@ -33,8 +33,8 @@ const brandController = {
 
             return res.status(200).json({ msg: "Data Get Successfully...", data });
         } catch (error) {
-            console.log(error);
-            return res.status(500).json({ msg: "Internal Server error...", success: false })
+            console.log("GET BRAND ERROR:", error);
+            return res.status(500).json({ msg: error.message || "Internal Server error...", success: false })
         }
     },
     async createBrand(req, res) {
@@ -64,8 +64,8 @@ const brandController = {
 
             return res.status(201).json({ msg: "Brand Create Successfull...", success: true, createData });
         } catch (error) {
-            console.log(error);
-            return res.status(501).json({ msg: "Internal Server error...", success: false })
+            console.log("CREATE BRAND ERROR:", error);
+            return res.status(500).json({ msg: error.message || "Internal Server error...", success: false })
         }
     },
     async deleteBrands(req, res) {
