@@ -173,6 +173,7 @@
 
 
 const { uploadImage, isRemoteUrl } = require("../utility/uploadImage");
+const { resolveCategoryImage } = require("../utility/resolveImageUrl");
 const Category = require("../models/category.model");
 const Product = require("../models/product.model");
 const fs = require("fs");
@@ -180,7 +181,7 @@ const path = require("path");
 
 exports.getCategory = async (req, res) => {
   const cats = await Category.find();
-  res.send({ data: cats });
+  res.send({ data: cats.map(resolveCategoryImage) });
 };
 
 exports.getSingleCategory = async (req, res) => {
@@ -194,7 +195,7 @@ exports.getSingleCategory = async (req, res) => {
     }
 
     res.send({
-      data: cat,
+      data: resolveCategoryImage(cat),
     });
   } catch (error) {
     res.status(500).send({

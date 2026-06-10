@@ -34,6 +34,14 @@ async function saveLocalImage(file, folder) {
   return filename;
 }
 
+function isProductionDeploy() {
+  return (
+    process.env.NODE_ENV === "production" ||
+    process.env.RENDER === "true" ||
+    Boolean(process.env.RENDER_EXTERNAL_URL)
+  );
+}
+
 async function uploadImage(file, folder) {
   if (!file) {
     throw new Error("No file provided");
@@ -41,6 +49,12 @@ async function uploadImage(file, folder) {
 
   const client = getImageKitClient();
   const safeName = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+
+  if (!client && isProductionDeploy()) {
+    throw new Error(
+      "IMAGEKIT_PRIVATE_KEY is required on Render/production for permanent image storage"
+    );
+  }
 
   if (client) {
     const upload = await client.files.upload({

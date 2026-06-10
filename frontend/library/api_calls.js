@@ -76,7 +76,7 @@ export const getCategory = async (id = null) => {
     return res.data;
   } catch (e) {
     console.log("CATEGORY ERROR:", e.message);
-    return [];
+    return { data: [] };
   }
 };
 
@@ -125,6 +125,6 @@ export const getBrands = async (id = null) => {
     return res.data || [];
   } catch (e) {
     console.log("BRAND ERROR:", e.message);
-    return [];
+    return { data: [] };
   }
 };

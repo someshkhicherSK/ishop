@@ -8,12 +8,14 @@ import InfoSection from './components/homepage/InfoSection'
 import { getBrands, getCategory, getProduct } from "../../../library/api_calls";
 async function page() {
     const Categories = await getCategory(null);
-    const Brands = await getBrands(null)
-    const products = await getProduct(null)
+    const Brands = await getBrands(null);
+    const products = await getProduct(null);
+    const categoryList = Categories?.data || [];
+    const brandList = Brands?.data || [];
   return (
     <>
-    <TopMain Categories={Categories.data}/>
-    <FretureBrand Brands={Brands.data} Categories={Categories.data}/>
+    <TopMain Categories={categoryList}/>
+    <FretureBrand Brands={brandList} Categories={categoryList}/>
     <DealsSec producte={products}/>
     <TopSelling products={products}/>
     <BestSelling products={products}/>

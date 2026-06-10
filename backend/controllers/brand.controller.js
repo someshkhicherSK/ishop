@@ -1,6 +1,7 @@
 const brandModel = require('../models/brand.model');
 const productModel = require("../models/product.model");
 const { uploadImage, isRemoteUrl } = require('../utility/uploadImage');
+const { resolveBrandImage } = require('../utility/resolveImageUrl');
 const path = require('path');
 const fs = require('fs')
 const brandController = {
@@ -8,23 +9,32 @@ const brandController = {
         const { id } = req.params;
         try {
             if (id) {
-                getBrand = await brandModel.findById(id)
-            } else {
-                getBrand = await brandModel.find()
-                const data = await Promise.all(
-                          this.getBrand.map(async(prod)=>{
-                            const productCount = await productModel.countDocuments({BrandId:prod._id});
-                            return {
-                              ...prod.toObject(),
-                              productCount
-                            }
-                          })
-                        )
-                        return res.status(201).json({ msg: "Data Get Successfully...", data });
+                const brand = await brandModel.findById(id);
+                if (!brand) {
+                    return res.status(404).json({ msg: "Brand not found", success: false });
+                }
+                return res.status(200).json({
+                    msg: "brand get successful...",
+                    success: true,
+                    getBrand: resolveBrandImage(brand),
+                });
             }
-            return res.status(201).json({ msg: "brand get successful...", success: true, getBrand })
+
+            const brands = await brandModel.find();
+            const data = await Promise.all(
+                brands.map(async (brand) => {
+                    const productCount = await productModel.countDocuments({ BrandId: brand._id });
+                    return {
+                        ...resolveBrandImage(brand),
+                        productCount,
+                    };
+                })
+            );
+
+            return res.status(200).json({ msg: "Data Get Successfully...", data });
         } catch (error) {
-            return res.status(501).json({ msg: "Internal Server error...", success: false })
+            console.log(error);
+            return res.status(500).json({ msg: "Internal Server error...", success: false })
         }
     },
     async createBrand(req, res) {

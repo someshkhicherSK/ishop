@@ -10,18 +10,20 @@ async function layout({ children }) {
   const Categories = await getCategory(null);
   const Brands = await getBrands(null);
   const Colors = await getColors(null);
+  const categoryList = Categories?.data || [];
+  const brandList = Brands?.data || [];
 
   return (
     <section>
       <TopBanner />
-      <PopularCategories Categories={Categories.data} />
+      <PopularCategories Categories={categoryList} />
 
       <main className="bg-white px-3 sm:px-4 md:px-6 py-4 sm:py-6 my-4 flex flex-col lg:flex-row gap-6">
         <section className="flex flex-col gap-y-3 w-full lg:w-[302px]">
-          <Category Categories={Categories.data} />
+          <Category Categories={categoryList} />
 
           <div className="flex flex-col gap-y-3 bg-[#EEEFF6] rounded-[10px] p-3 sm:p-5 md:p-6 w-full md:w-auto shadow-sm">
-            <BrandFilter Brands={Brands.data} />
+            <BrandFilter Brands={brandList} />
             <PriceFilter />
             <ColorFillter Colors={Colors} />
           </div>
