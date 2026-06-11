@@ -31,7 +31,7 @@ function HomeSlider() {
                             >
                                 <div className="px-4 sm:px-8 md:px-16 py-6 md:py-10 text-white">
                                     <h1 className="mb-4 md:mb-6 text-[28px] sm:text-[40px] md:text-[72px] font-bold leading-[1.2] md:leading-[1.1]">
-                                        Don’t miss amazing grocery deals
+                                        Don’t miss amazing phones, laptops, deals
                                     </h1>
                                     <p className="mb-4 text-[16px] sm:text-[20px] md:text-[30px] font-semibold">
                                         Sign up for the daily newsletter
